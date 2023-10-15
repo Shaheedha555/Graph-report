@@ -6,11 +6,14 @@ import jsPDF from 'jspdf';
 import html2canvas from "html2canvas";
 function App() {
   const [isClicked, setIsClicked] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
 
   const [jsonData, setJsonData] = useState({});
   const apiUrl = process.env.REACT_APP_API_URL
   useEffect(() => {
     const fetchData = () => {
+      setIsLoading(true)
       fetch(apiUrl)
         .then(response => {
           if (!response.ok) {
@@ -20,6 +23,7 @@ function App() {
         })
         .then(data => {
           setJsonData(data);
+          setIsLoading(false)
         })
         .catch(error => {
           console.error('Error fetching data:', error);
@@ -28,7 +32,7 @@ function App() {
 
     fetchData();
 
-  }, [isClicked, apiUrl]);
+  }, [apiUrl]);
   const handlePrint = () => {
     setIsClicked(true);
     generatePDF();
@@ -91,7 +95,8 @@ function App() {
   }
   return (
     <div className="App">
-      {Object.keys(jsonData).length !== 0 && <Button handlePrint={handlePrint} />}
+      {!isLoading && Object.keys(jsonData).length !== 0 && <Button handlePrint={handlePrint} />}
+      {isLoading && <p>Loading...</p>}
       <Graph jsonData={jsonData} id="graph" />
     </div>
   );
